@@ -1,7 +1,24 @@
+"""
+Check which inputs are a valid camera.
+https://github.com/robmarkcole/mqtt-camera-streamer/blob/master/scripts/check-opencv-cameras.py
+"""
 import streamlit as st
-# Set the app title
-st.title('My First Streamlit App')
-# Add a welcome message
-st.write('Welcome to my Streamlit app!')
-# Create a text input
-widgetuser_input = st.text_input('Enter a custom message:', 'Hello, praman!')
+
+import cv2
+
+def check_webcam():
+    webcam_dict = dict()
+    for i in range(0, 10):
+        cap = cv2.VideoCapture(i)
+        is_camera = cap.isOpened()
+        if is_camera:
+            webcam_dict[f"index[{i}]"] = "VALID"
+            cap.release()
+        else:
+            webcam_dict[f"index[{i}]"] = None
+    return webcam_dict
+
+if __name__ == "__main__":
+    st.title('WebCam index validation check')
+    webcam_dict = check_webcam()
+    st.write(webcam_dict)
