@@ -1,9 +1,1 @@
-wheel
-numpy
-pandas
-plotly
-opencv-python-headless
-cmake
-dlib
-face_recognition
 streamlit
