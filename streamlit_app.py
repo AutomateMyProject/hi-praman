@@ -1,40 +1,37 @@
-import altair as alt
-import numpy as np
-import pandas as pd
-import streamlit as st
+# Import the required libraries.
+import mediapipe as mp
+import cv2
 
-"""
-# Welcome to Streamlit!
+# Initialize the MediaPipe Hands model.
+mp_hands = mp.solutions.hands
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Initialize the VideoCapture object.
+cap = cv2.VideoCapture(0)
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Create a loop to capture and process video frames.
+while cap.isOpened():
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+    # Capture a frame from the video stream.
+    ret, frame = cap.read()
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+    # Convert the frame to RGB color space.
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+    # Process the image with the MediaPipe Hands model.
+    results = mp_hands.process(image)
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+    # Draw the hand landmarks on the image.
+    image = mp.solutions.drawing_utils.draw_landmarks(image, results.multi_hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+    # Display the image.
+    cv2.imshow('Hand Gesture Detection', image)
+
+    # Press 'q' to quit.
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release the VideoCapture object.
+cap.release()
+
+# Destroy all windows.
+cv2.destroyAllWindows()
